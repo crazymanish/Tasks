@@ -52,8 +52,8 @@ extension Home {
     private var footerItems: [NSMenuItem] {
         let footerItems: [(option: MenuOption, key: String)] = [
             (.separator, ""),
-            (.add, "+"),
-            (.clear, "-"),
+            (.add, "n"),
+            (.clear, "x"),
             (.quit, "q")
         ]
 

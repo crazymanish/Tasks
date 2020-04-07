@@ -10,8 +10,6 @@ import Cocoa
 
 class TaskMenuItem: NSMenuItem {
     typealias Callback = (TaskMenuItem) -> Void
-
-    private let showMaxLength = 50
     private var onSelected: [Callback] = []
     var task: Task!
 
@@ -20,46 +18,85 @@ class TaskMenuItem: NSMenuItem {
     }
 
     init(task: Task, onSelected: @escaping Callback) {
-        super.init(title: "", action: #selector(onSelect(_:)), keyEquivalent: "")
+        super.init(title: "", action: nil, keyEquivalent: "")
 
         self.task = task
         self.onSelected = [onSelected]
-        self.target = self
 
         loadTask(task)
     }
 
-    @objc
-    func onSelect(_ sender: NSMenuItem) {
-        onSelected.forEach { $0(self) }
+    private func loadTask(_ task: Task) {
+        let menuView = TaskMenuView(task: task) {
+            self.onSelected.forEach { $0(self) }
+        }
+
+        view = menuView
+    }
+}
+
+class TaskMenuView: NSView {
+    lazy var textField = NSTextField(frame: .zero)
+    lazy var button = NSButton(frame: .zero)
+    private let showMaxLength = 50
+
+    typealias Callback = () -> Void
+    private var onButtonClicked: [Callback] = []
+
+    init(task: Task, onButtonClicked: @escaping Callback) {
+        super.init(frame: NSMakeRect(0, 0, 300, 25))
+        self.onButtonClicked = [onButtonClicked]
+        setupView()
+        updateTextField(task: task)
     }
 
-    private func loadTask(_ task: Task) {
-        let taskValue = task.value
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        setupView()
+    }
 
-        self.title = humanizedTitle(taskValue)
-        self.toolTip = """
-        \(taskValue)\n \n
-        Press ⌘ E to edit.
-        Press ⌘ X to delete.
-        """
-        self.state = task.isDone ? .on : .off
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
+    private func setupView() {
+        textField.frame = NSMakeRect(25, -5, 275, 25)
+        textField.backgroundColor = .clear
+        textField.drawsBackground = false
+        textField.isBezeled = false
+        
+
+        button.title = ""
+        button.setButtonType(.switch)
+        button.bezelStyle = .texturedRounded
+        button.frame = NSMakeRect(4, 0, 25, 25)
+        button.target = self
+        button.action = #selector(buttonClick)
+
+        addSubview(textField)
+        addSubview(button)
+    }
+
+    @objc
+    private func buttonClick(_ sender : NSButton) {
+        onButtonClicked.forEach { $0() }
+    }
+
+    private func updateTextField(task: Task) {
+        var attributes: [NSAttributedString.Key: AnyObject] = [
+            .foregroundColor: NSColor.gray
+        ]
 
         if task.isDone {
-            let attributes = [
-                NSAttributedString.Key.strikethroughStyle: NSNumber(value: NSUnderlineStyle.single.rawValue)
+            attributes = [
+                .strikethroughStyle: NSNumber(value: NSUnderlineStyle.single.rawValue),
+                .strokeColor: NSColor.black,
+                .foregroundColor: NSColor.lightGray
             ]
-            attributedTitle = NSAttributedString(string: taskValue, attributes: attributes)
         }
-    }
+        textField.attributedStringValue = NSAttributedString(string: task.value, attributes: attributes)
+        textField.toolTip = task.value
 
-    private func humanizedTitle(_ title: String) -> String {
-        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmedTitle.count > showMaxLength {
-            let index = trimmedTitle.index(trimmedTitle.startIndex, offsetBy: showMaxLength)
-            return "\(trimmedTitle[...index])..."
-        } else {
-            return trimmedTitle
-        }
+        button.state = task.isDone ? .on : .off
     }
 }
