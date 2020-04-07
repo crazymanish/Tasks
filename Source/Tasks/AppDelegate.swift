@@ -10,17 +10,18 @@ import Cocoa
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-
-
+    private var home: Home!
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Insert code here to initialize your application
+        home = Home()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.home.showPopUp()
+        }
     }
 
-    func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        home.statusItem.isVisible = true
+        return true
     }
-
-
 }
-
