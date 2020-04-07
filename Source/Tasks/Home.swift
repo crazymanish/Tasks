@@ -36,6 +36,7 @@ class Home: NSObject {
 
 extension Home {
     private func start() {
+        statusItem.button?.image = NSImage(named: "StatusBarMenuImage")
         statusItem.menu = menu
         statusItem.isVisible = true
 
@@ -52,6 +53,7 @@ extension Home {
         let footerItems: [(option: MenuOption, key: String)] = [
             (.separator, ""),
             (.add, "+"),
+            (.clear, "-"),
             (.quit, "q")
         ]
 
@@ -73,6 +75,8 @@ extension Home {
         switch sender.title {
         case MenuOption.add.rawValue:
             add(sender)
+        case MenuOption.clear.rawValue:
+            clear(sender)
         case MenuOption.quit.rawValue:
             NSApp.stop(sender)
         default:
@@ -84,6 +88,11 @@ extension Home {
         let task = Task(value: UUID().uuidString)
 
         taskStorage.add(task)
+        reloadPopUp()
+    }
+
+    private func clear(_ sender: NSMenuItem) {
+        taskStorage.clear()
         reloadPopUp()
     }
 }

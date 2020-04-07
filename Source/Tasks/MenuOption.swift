@@ -11,5 +11,6 @@ import Foundation
 enum MenuOption: String {
     case separator = ""
     case add = "Add new task"
+    case clear = "Delete all tasks"
     case quit = "Quit"
 }
