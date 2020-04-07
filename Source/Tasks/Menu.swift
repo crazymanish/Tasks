@@ -9,7 +9,7 @@
 import AppKit
 
 class Menu: NSMenu {
-    let menuWidth = 300
+    let menuWidth: CGFloat = 300
 
     private weak var home: Home?
     private var taskStorage: TaskStorage!
@@ -24,7 +24,7 @@ class Menu: NSMenu {
         self.taskStorage = taskStorage
         self.home = home
         self.delegate = self
-        self.minimumWidth = CGFloat(menuWidth)
+        self.minimumWidth = menuWidth
     }
 
     func reloadData() {
@@ -35,7 +35,10 @@ class Menu: NSMenu {
 extension Menu: NSMenuDelegate {
     func menuWillOpen(_ menu: NSMenu) {
         clear()
-        for task in taskStorage.all.sorted(by: { $0.updatedAt.compare($1.updatedAt) == .orderedAscending }) {
+
+        let sortedByDate = taskStorage.all.sorted(by: { $0.updatedAt.compare($1.updatedAt) == .orderedAscending })
+        let sortedByDateDone = sortedByDate.sorted(by: { $0.isDone && !$1.isDone })
+        for task in sortedByDateDone {
             let taskMenuItem = TaskMenuItem(task: task, onSelected: taskMenuItemOnSelected(_:))
             taskMenuItems.append(taskMenuItem)
 

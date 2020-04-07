@@ -31,9 +31,7 @@ class TaskMenuItem: NSMenuItem {
 
     @objc
     func onSelect(_ sender: NSMenuItem) {
-        for hook in onSelected {
-            hook(self)
-        }
+        onSelected.forEach { $0(self) }
     }
 
     private func loadTask(_ task: Task) {
@@ -46,6 +44,13 @@ class TaskMenuItem: NSMenuItem {
         Press ⌘ X to delete.
         """
         self.state = task.isDone ? .on : .off
+
+        if task.isDone {
+            let attributes = [
+                NSAttributedString.Key.strikethroughStyle: NSNumber(value: NSUnderlineStyle.single.rawValue)
+            ]
+            attributedTitle = NSAttributedString(string: taskValue, attributes: attributes)
+        }
     }
 
     private func humanizedTitle(_ title: String) -> String {

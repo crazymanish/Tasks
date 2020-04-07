@@ -29,6 +29,7 @@ class TaskStorage {
 
     func update(_ task: Task) {
         if let itemIndex = all.firstIndex(of: task) {
+            task.updatedAt = Date()
             all.remove(at: itemIndex)
             all.insert(task, at: itemIndex)
         }
